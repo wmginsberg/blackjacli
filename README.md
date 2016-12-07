@@ -8,6 +8,7 @@ Played with a standard 52-card deck, with replacements.
 
 ## Future feature ideas
 * Add functions like Split and Double Down
+* Clean up code!!! it's so ugly
 * Test Ace high/low functionality
 * Add high score / game saving
 * Render cards better
