@@ -5,12 +5,17 @@ import random
 def game_start():
 	deck = make_deck()
 	print 'Welcome to blackjack!   '
+	
 	name = raw_input('What is your name?   ')
 	print 'Hi '+name+'! You are starting out with 100. The minimum bet is 10.'
+	
 	round_num = 1
 	total_money = 100
 	while (total_money >= 10):
+		# Play the round
 		winnings,result,round_num = play_round(round_num,total_money,deck)
+
+		# Check to see if the round was valid
 		if (result):
 			total_money += winnings
 			if (result == 1):
@@ -23,6 +28,8 @@ def game_start():
 				continue
 		else:
 			total_money -= winnings
+	if (total_money < 10):
+		print "Game over.\nYou only have $" + str(total_money) + " left, and need $10 to play :("
 
 
 def play_round(round_num,total_money,deck):
@@ -56,6 +63,11 @@ def play_round(round_num,total_money,deck):
 				print 'Push!   +0'
 				result = 1
 				round_num += 1
+			elif (x == 4):
+				print 'You win!   +' + str(bet*(3/2))
+				winnings += bet*(3/2)
+				result = 1
+				round_num += 1				
 
 			# If the user loses: tell them, decrease their score, increase the round
 			else:
@@ -64,6 +76,7 @@ def play_round(round_num,total_money,deck):
 				result = 0
 				round_num += 1
 		
+		# If the bet was invalid, tell the user
 		elif (bet >= total_money):
 			result = 3
 
@@ -73,6 +86,8 @@ def play_round(round_num,total_money,deck):
 	return winnings, result, round_num
 
 def deal_cards(deck):
+	
+	# Deal initial hand
 	random.shuffle(deck)
 	dealer_down = deck[0]
 	dealer_up = deck[1]
@@ -80,39 +95,43 @@ def deal_cards(deck):
 	player_two = deck[3]
 	dealer_ace = False
 	player_ace = False
-	print 'Dealer   :   [??????????????]' + '[' + dealer_up['title'] + ']'
+
+	# Tell Player both of their cards, and the dealers showing card
+	print 'Dealer   :   [' + dealer_down['title'] + '][' + dealer_up['title'] + ']'#[??????????????]' + '[' + dealer_up['title'] + ']'
 	print 'Your hand:   [' + player_one['title'] + '][' + player_two['title'] + ']' 
 	
+	# Check to see if either player has an Ace
 	if (int(deck[0]['value']) == 11 or int(deck[1]['value']) == 11):
 		dealer_ace = True
 	if (int(deck[2]['value']) == 11 or int(deck[3]['value']) == 11):
 		player_ace = True
 
+	# Check to see if the dealer has blackjack, before the player
 	dealer_total = int(deck[0]['value']) + int(deck[1]['value'])
-	if (dealer_total == 21):
-		if (int(deck[0]['value']) == 11 and int(deck[1]['value']) == 10):
-			print 'Dealer Blackjack!'
-			return 0
-		elif (int(deck[1]['value']) == 11 and int(deck[0]['value']) == 10):
-			print 'Dealer Blackjack!'
-			return 0
+	if (dealer_ace and dealer_total==21):
+		print 'Dealer Blackjack!'
+		# If both have blackjack, push
+		if (player_ace and player_total==21):
+			return 2
+		return 0
 
+	# Check to see if the player has blackjack
 	player_total = int(deck[2]['value']) + int(deck[3]['value'])
-	if (player_total == 21):
-		if (int(deck[2]['value']) == 11 and int(deck[3]['value']) == 10):
-			print 'You\'ve got Blackjack!'
-			return 1
-		elif (int(deck[3]['value']) == 11 and int(deck[2]['value']) == 10):
-			print 'You\'ve got Blackjack!'
-			return 1
+	if (player_ace and player_total==21):
+		print 'You\'ve got Blackjack!'
+		return 4
 
 	print 'Your total:   ' + str(player_total)
+
+	#------------------------------------
+	# Index to know where in the deck we are 
 	i = 4
 	while (True):
 		move = raw_input('Hit or Stay? (h/s)   ')
 		
 		if (move == 's'):
 			while (dealer_total < 17 or dealer_ace):
+				print 'Dealer gets... ' + deck[i]['value']
 				dealer_total += int(deck[i]['value'])
 				i += 1	
 				if (dealer_ace):
@@ -129,6 +148,7 @@ def deal_cards(deck):
 					return 0
 				else:
 					return 2
+
 		elif (move == 'h'):
 			player_total += int(deck[i]['value'])
 			i += 1		
@@ -136,6 +156,7 @@ def deal_cards(deck):
 				if (player_ace):
 					player_total -= 10
 					player_ace = False
+					print 'Player total:   ' + str(player_total)
 				else:
 					print 'Player bust!   ' + str(player_total)
 					return 0
